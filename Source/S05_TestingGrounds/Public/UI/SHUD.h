@@ -4,15 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
-#include "S05_TestingGroundsHUD.generated.h"
+#include "SHUD.generated.h"
 
 UCLASS()
-class AS05_TestingGroundsHUD : public AHUD
+class ASHUD : public AHUD
 {
 	GENERATED_BODY()
 
 public:
-	AS05_TestingGroundsHUD();
+	ASHUD();
 
 	/** Primary draw call for the HUD */
 	virtual void DrawHUD() override;
