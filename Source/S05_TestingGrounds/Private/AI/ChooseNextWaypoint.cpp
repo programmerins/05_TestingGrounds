@@ -14,12 +14,12 @@ EBTNodeResult::Type UChooseNextWaypoint::ExecuteTask(UBehaviorTreeComponent& Own
 {
 	// Get the patrol route
 	APawn*					ControlledPawn	= OwnerComp.GetAIOwner()->GetPawn();
-	UPatrolRouteComponent*			PatrolRouteComponent		= ControlledPawn->FindComponentByClass<UPatrolRouteComponent>();
-	if (!ensure(PatrolRouteComponent))		{ return EBTNodeResult::Failed; }
+	UPatrolRouteComponent*	PatrolRouteComponent		= ControlledPawn->FindComponentByClass<UPatrolRouteComponent>();
+	if (!ensure(PatrolRouteComponent))	{ return EBTNodeResult::Failed; }
 
 	// Warn about empty patrol routes
 	const TArray<AActor*>	PatrolPoints	= PatrolRouteComponent->GetPatrolPoints();
-	if (PatrolPoints.Num() == 0)	{ return EBTNodeResult::Failed; }
+	if (PatrolPoints.Num() == 0)		{ return EBTNodeResult::Failed; }
 
 	// Set next waypoint
 	UBlackboardComponent*	BlackboardComp	= OwnerComp.GetBlackboardComponent();

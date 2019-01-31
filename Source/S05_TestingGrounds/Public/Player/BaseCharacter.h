@@ -18,12 +18,13 @@ class ABaseCharacter : public ACharacter
 	class USkeletalMeshComponent* Mesh1P;
 
 	/** Gun mesh: 1st person view (seen only by self) */
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	class USkeletalMeshComponent* FP_Gun;
+	//UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	//class USkeletalMeshComponent* FP_Gun;
 
 	/** Location on gun mesh where projectiles should spawn. */
-	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
-	class USceneComponent* FP_MuzzleLocation;
+	//UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
+	//class USceneComponent* FP_MuzzleLocation;
+
 
 	/** Gun mesh: VR view (attached to the VR controller directly, no arm, just the actual gun) */
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
@@ -45,6 +46,8 @@ class ABaseCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UMotionControllerComponent* L_MotionController;
 
+	class AGun* Gun;
+
 public:
 	ABaseCharacter();
 
@@ -65,7 +68,7 @@ public:
 	FVector GunOffset;
 
 	/** Projectile class to spawn */
-	UPROPERTY(EditDefaultsOnly, Category=Projectile)
+	UPROPERTY(EditDefaultsOnly, Category = Projectile)
 	TSubclassOf<class ABallProjectile> ProjectileClass;
 
 	/** Sound to play each time we fire */
@@ -80,10 +83,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Gameplay)
 	uint32 bUsingMotionControllers : 1;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Setup")
+	TSubclassOf<class AGun> GunBlueprint;
+
 protected:
 	
 	/** Fires a projectile. */
-	void OnFire();
+	//void OnFire();
 
 	/** Resets HMD orientation and position in VR. */
 	void OnResetVR();
