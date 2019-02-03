@@ -33,7 +33,6 @@ AGun::AGun()
 void AGun::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 
@@ -41,7 +40,6 @@ void AGun::BeginPlay()
 void AGun::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 
