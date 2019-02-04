@@ -2,6 +2,27 @@
 #include "BaseCharacter.h"
 
 
+
+
+
+
+
+
+
+/*
+	DELETED THIS SOURCE CODE
+	02-04-19
+*/
+
+
+
+
+
+
+
+
+
+
 // IWYU Include
 #include "BallProjectile.h"
 #include "Animation/AnimInstance.h"
@@ -98,7 +119,7 @@ void ABaseCharacter::BeginPlay()
 	if (GunBlueprint != nullptr)
 	{
 		Gun = GetWorld()->SpawnActor<AGun>(GunBlueprint);
-		Gun->AnimInstance = Mesh1P->GetAnimInstance();
+		//Gun->AnimInstance = Mesh1P->GetAnimInstance();
 		Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
 	}
 	else

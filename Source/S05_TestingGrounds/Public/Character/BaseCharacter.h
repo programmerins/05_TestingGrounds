@@ -1,5 +1,27 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
+
+
+
+
+
+
+
+
+/*
+	DELETED THIS SOURCE CODE
+	02-04-19
+*/
+
+
+
+
+
+
+
+
+
+
 #pragma once
 
 #include "CoreMinimal.h"
