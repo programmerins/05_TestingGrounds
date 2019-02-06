@@ -28,8 +28,11 @@ void ATGTile::BeginPlay()
 void ATGTile::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	
-	Pool->Return(NavMeshBoundsVolume);
+
+	if (Pool != nullptr && NavMeshBoundsVolume != nullptr)
+	{
+		Pool->Return(NavMeshBoundsVolume);
+	}
 }
 
 
@@ -114,7 +117,9 @@ void ATGTile::PlaceActor(const TSubclassOf<AActor>& ToSpawn, const FSpawnPositio
 
 void ATGTile::PlaceActor(const TSubclassOf<APawn>& ToSpawn, const FSpawnPosition& SpawnPosition)
 {
-	APawn* Spawned = GetWorld()->SpawnActor<APawn>(ToSpawn);
+	FRotator Rotation = FRotator(0, SpawnPosition.Rotation, 0);
+
+	APawn* Spawned = GetWorld()->SpawnActor<APawn>(ToSpawn, SpawnPosition.Location, Rotation);
 	
 	if (Spawned)
 	{
