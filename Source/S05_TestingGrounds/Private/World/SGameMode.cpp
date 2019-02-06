@@ -1,9 +1,12 @@
 // Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "SGameMode.h"
+
+
 #include "SHUD.h"
 #include "BaseCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+
 
 ASGameMode::ASGameMode()
 	: Super()

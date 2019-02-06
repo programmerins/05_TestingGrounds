@@ -6,6 +6,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "SGameMode.generated.h"
 
+
 UCLASS(minimalapi)
 class ASGameMode : public AGameModeBase
 {
@@ -14,6 +15,3 @@ class ASGameMode : public AGameModeBase
 public:
 	ASGameMode();
 };
-
-
-

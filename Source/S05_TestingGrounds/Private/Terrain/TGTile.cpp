@@ -1,10 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #include "TGTile.h"
 
 
-#include "DrawDebugHelpers.h"
-
+#include "ActorPool.h"
+#include "AI/NavigationSystemBase.h"
 
 // Sets default values
 ATGTile::ATGTile()
@@ -12,6 +11,10 @@ ATGTile::ATGTile()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
+	NavigationBoundsOffset = FVector(2000, 0, 0);
+
+	MinExtent = FVector(0, -2000, 0);
+	MaxExtent = FVector(4000, 2000, 0);
 }
 
 
@@ -22,45 +25,111 @@ void ATGTile::BeginPlay()
 }
 
 
+void ATGTile::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	
+	Pool->Return(NavMeshBoundsVolume);
+}
+
+
 // Called every frame
 void ATGTile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 
-void ATGTile::PlaceActors(const TSubclassOf<AActor> ToSpawn, int MinSpawn, int MaxSpawn, float Radius)
+void ATGTile::SetPool(UActorPool* InPool)
 {
-	int	NumberToSpawn = FMath::RandRange(MinSpawn, MaxSpawn);
+	UE_LOG(LogTemp, Warning, TEXT("[%s] Setting Pool %s"), *(this->GetName()), *(InPool->GetName()))
+
+	Pool = InPool;
+	PositionNavMeshBoundsVolume();
+}
+
+
+void ATGTile::PositionNavMeshBoundsVolume()
+{
+	NavMeshBoundsVolume = Pool->Checkout();
+
+	if (NavMeshBoundsVolume == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[%s] Not enough actors in pool."), *GetName())
+		return;
+	}
+
+	UE_LOG(LogTemp, Error, TEXT("[%s] Checked out: %s"), *GetName(), *NavMeshBoundsVolume->GetName())
+	NavMeshBoundsVolume->SetActorLocation(GetActorLocation() + NavigationBoundsOffset);
+	FNavigationSystem::Build(*GetWorld());
+}
+
+
+template<typename T>
+void ATGTile::RandomlyPlaceActors(const TSubclassOf<T>& ToSpawn, const FRandSpawnPosition& RandomPosition)
+{
+	int	NumberToSpawn = FMath::RandRange(RandomPosition.MinSpawn, RandomPosition.MaxSpawn);
 
 	for (int32 i = 0; i < NumberToSpawn; ++i)
 	{
-		FVector SpawnPoint;
-		bool bIsFoundLocation = FindEmptyLocation(OUT SpawnPoint, Radius);
+		FSpawnPosition SpawnPosition;
+
+		SpawnPosition.Scale = FMath::RandRange(RandomPosition.MinScale, RandomPosition.MaxScale);
+		bool bIsFoundLocation = FindEmptyLocation(OUT SpawnPosition.Location, RandomPosition.Radius * SpawnPosition.Scale);
 
 		if (bIsFoundLocation)
 		{
-			PlaceActor(ToSpawn, SpawnPoint);
+			SpawnPosition.Rotation = FMath::FRandRange(-180.f, 180.f);
+			PlaceActor(ToSpawn, SpawnPosition);
 		}
 	}
 }
 
 
-void ATGTile::PlaceActor(const TSubclassOf<AActor>& ToSpawn, FVector SpawnPoint)
+void ATGTile::PlaceActors(const TSubclassOf<AActor> ToSpawn, FRandSpawnPosition RandomPosition)
+{
+	RandomlyPlaceActors(ToSpawn, RandomPosition);
+}
+
+
+void ATGTile::PlaceAISpawns(const TSubclassOf<APawn> ToSpawn, FRandSpawnPosition RandomPosition)
+{
+	RandomlyPlaceActors(ToSpawn, RandomPosition);
+}
+
+
+void ATGTile::PlaceActor(const TSubclassOf<AActor>& ToSpawn, const FSpawnPosition& SpawnPosition)
 {
 	AActor* Spawned = GetWorld()->SpawnActor(ToSpawn);
 
-	Spawned->SetActorRelativeLocation(SpawnPoint);
-	Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
+	if (Spawned)
+	{
+		Spawned->SetActorRelativeLocation(SpawnPosition.Location);
+		Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
+		Spawned->SetActorRotation(FRotator(0, SpawnPosition.Rotation, 0));
+		Spawned->SetActorScale3D(FVector(SpawnPosition.Scale));
+	}
+}
+
+
+void ATGTile::PlaceActor(const TSubclassOf<APawn>& ToSpawn, const FSpawnPosition& SpawnPosition)
+{
+	APawn* Spawned = GetWorld()->SpawnActor<APawn>(ToSpawn);
+	
+	if (Spawned)
+	{
+		Spawned->SetActorRelativeLocation(SpawnPosition.Location);
+		Spawned->AttachToActor(this, FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
+		Spawned->SetActorRotation(FRotator(0, SpawnPosition.Rotation, 0));
+		Spawned->SpawnDefaultController();
+		Spawned->Tags.Add(FName("Enemy"));
+	}
 }
 
 
 bool ATGTile::FindEmptyLocation(FVector& OutLocation, const float Radius)
 {
-	FVector Min(0, -2000, 0);
-	FVector Max(4000, 2000, 0);
-	FBox Bounds(Min, Max);
+	FBox Bounds(MinExtent, MaxExtent);
 
 	const int MAX_ATTEMPTS = 100;
 
@@ -91,8 +160,5 @@ bool ATGTile::CanSpawnAtLocation(const FVector Location, const float Radius)
 		FCollisionShape::MakeSphere(Radius)
 	);
 
-	FColor ResultColor = bHasHit ? FColor::Red : FColor::Green;
-	DrawDebugCapsule(GetWorld(), GlobalLocation, 0, Radius, FQuat::Identity, ResultColor, true, 100);
-	
 	return !bHasHit;
 }
